@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "811630113588",
+    "project_id": "game-web-a57f9",
+    "storage_bucket": "game-web-a57f9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811630113588:android:512392b965614b53b12b61",
+        "android_client_info": {
+          "package_name": "com.pocpe.todo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9u6InYFRw0gvZnqd0bvNbQ-aHmxbv0SQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,65 @@
+name: Build and Release Android APK
+
+on:
+  release:
+    types: [ created ]
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version name (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+      version_code:
+        description: 'Version code (e.g., 1)'
+        required: true
+        default: '1'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Create keystore properties (if signing config is needed)
+      run: |
+        if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/keystore.jks
+          echo "keystoreFile=keystore.jks" >> app/keystore.properties
+          echo "keystorePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> app/keystore.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> app/keystore.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> app/keystore.properties
+        fi
+      
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
+      
+    - name: Upload Release APK to Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: app/build/outputs/apk/release/app-release.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload APK as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-apk
+        path: app/build/outputs/apk/release/app-release.apk
+        retention-days: 90

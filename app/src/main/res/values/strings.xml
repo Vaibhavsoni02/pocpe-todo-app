@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">My Client App</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login_with_email">Login with Email</string>
+    <string name="login_with_facebook">Login with Facebook</string>
+    <string name="welcome">Welcome!</string>
+    <string name="page_one">Page One</string>
+    <string name="page_two">Page Two</string>
+    <string name="check_internet">Check Internet</string>
+    <string name="check_bluetooth">Check Bluetooth</string>
+    <string name="internet_connected">Internet: Connected</string>
+    <string name="internet_disconnected">Internet: Disconnected</string>
+    <string name="bluetooth_enabled">Bluetooth: Enabled</string>
+    <string name="bluetooth_disabled">Bluetooth: Disabled</string>
+    <string name="no_account">Don\'t have an account? Sign up</string>
+    
+    <!-- Replace these with your actual Facebook App ID and Client Token -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+    
+    <!-- Replace with your actual Mixpanel token -->
+    <string name="mixpanel_token">YOUR_MIXPANEL_TOKEN</string>
+</resources>
