@@ -15,9 +15,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import com.pocpe.todo.databinding.ActivityHomeBinding
 import org.json.JSONObject
+import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeActivity : AppCompatActivity() {
     
@@ -53,10 +59,12 @@ class HomeActivity : AppCompatActivity() {
         val userEmail = intent.getStringExtra("user_email") ?: auth.currentUser?.email ?: "User"
         binding.tvUserEmail.text = "Logged in as: $userEmail"
         
-        // Identify user in Mixpanel
+        // Identify user in Mixpanel with email
         auth.currentUser?.let { user ->
-            mixpanel.identify(user.uid)
-            mixpanel.getPeople().set("email", user.email)
+            user.email?.let { email ->
+                mixpanel.identify(email)
+                updateMixpanelUserProfile(user, email)
+            }
         }
         
         // Track screen view
@@ -216,6 +224,39 @@ class HomeActivity : AppCompatActivity() {
         finish()
         
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
+    }
+    
+    /**
+     * Update Mixpanel user profile with user information and Android Advertising ID
+     */
+    private fun updateMixpanelUserProfile(user: FirebaseUser, email: String) {
+        // Set user properties
+        mixpanel.getPeople().set("email", email)
+        mixpanel.getPeople().set("user_id", user.uid)
+        user.displayName?.let { displayName ->
+            mixpanel.getPeople().set("name", displayName)
+        }
+        
+        // Get and set Android Advertising ID (GAID) asynchronously
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val adInfo = AdvertisingIdClient.getAdvertisingIdInfo(applicationContext)
+                val advertisingId = adInfo?.id
+                val isLimitAdTrackingEnabled = adInfo?.isLimitAdTrackingEnabled ?: false
+                
+                withContext(Dispatchers.Main) {
+                    advertisingId?.let { gaid ->
+                        mixpanel.getPeople().set("android_ad_id", gaid)
+                        mixpanel.getPeople().set("gps_adid", gaid) // Alternative name
+                        mixpanel.getPeople().set("limit_ad_tracking", isLimitAdTrackingEnabled)
+                    }
+                }
+            } catch (e: Exception) {
+                // Advertising ID might not be available (e.g., on emulator or restricted)
+                // Log but don't fail the process
+                android.util.Log.w("HomeActivity", "Failed to get Advertising ID: ${e.message}")
+            }
+        }
     }
     
     override fun onDestroy() {

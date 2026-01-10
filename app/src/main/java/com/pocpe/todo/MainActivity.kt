@@ -14,6 +14,11 @@ import com.google.firebase.auth.FirebaseUser
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import com.pocpe.todo.databinding.ActivityMainBinding
 import org.json.JSONObject
+import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     
@@ -83,8 +88,12 @@ class MainActivity : AppCompatActivity() {
                                 put("method", "email")
                             }
                             mixpanel.track("Login Success", successProps)
-                            mixpanel.identify(user.uid)
-                            mixpanel.getPeople().set("email", user.email)
+                            
+                            // Identify user with email
+                            user.email?.let { email ->
+                                mixpanel.identify(email)
+                                updateMixpanelUserProfile(user, email)
+                            }
                             
                             navigateToHome(user)
                         }
@@ -140,8 +149,12 @@ class MainActivity : AppCompatActivity() {
                                 put("method", "email")
                             }
                             mixpanel.track("Sign Up Success", successProps)
-                            mixpanel.identify(user.uid)
-                            mixpanel.getPeople().set("email", user.email)
+                            
+                            // Identify user with email
+                            user.email?.let { email ->
+                                mixpanel.identify(email)
+                                updateMixpanelUserProfile(user, email)
+                            }
                             
                             Toast.makeText(this, getString(R.string.account_created), Toast.LENGTH_SHORT).show()
                             navigateToHome(user)
@@ -204,8 +217,12 @@ class MainActivity : AppCompatActivity() {
                             put("method", "facebook")
                         }
                         mixpanel.track("Login Success", fbSuccessProps)
-                        mixpanel.identify(user.uid)
-                        mixpanel.getPeople().set("email", user.email)
+                        
+                        // Identify user with email
+                        user.email?.let { email ->
+                            mixpanel.identify(email)
+                            updateMixpanelUserProfile(user, email)
+                        }
                         
                         navigateToHome(user)
                     }
@@ -234,6 +251,39 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         callbackManager.onActivityResult(requestCode, resultCode, data)
+    }
+    
+    /**
+     * Update Mixpanel user profile with user information and Android Advertising ID
+     */
+    private fun updateMixpanelUserProfile(user: FirebaseUser, email: String) {
+        // Set user properties
+        mixpanel.getPeople().set("email", email)
+        mixpanel.getPeople().set("user_id", user.uid)
+        user.displayName?.let { displayName ->
+            mixpanel.getPeople().set("name", displayName)
+        }
+        
+        // Get and set Android Advertising ID (GAID) asynchronously
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val adInfo = AdvertisingIdClient.getAdvertisingIdInfo(applicationContext)
+                val advertisingId = adInfo?.id
+                val isLimitAdTrackingEnabled = adInfo?.isLimitAdTrackingEnabled ?: false
+                
+                withContext(Dispatchers.Main) {
+                    advertisingId?.let { gaid ->
+                        mixpanel.getPeople().set("android_ad_id", gaid)
+                        mixpanel.getPeople().set("gps_adid", gaid) // Alternative name
+                        mixpanel.getPeople().set("limit_ad_tracking", isLimitAdTrackingEnabled)
+                    }
+                }
+            } catch (e: Exception) {
+                // Advertising ID might not be available (e.g., on emulator or restricted)
+                // Log but don't fail the login process
+                android.util.Log.w("MainActivity", "Failed to get Advertising ID: ${e.message}")
+            }
+        }
     }
     
     override fun onDestroy() {
