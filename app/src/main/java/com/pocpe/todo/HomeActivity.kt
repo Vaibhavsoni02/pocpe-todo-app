@@ -38,7 +38,7 @@ class HomeActivity : AppCompatActivity() {
         val mixpanelToken = getString(R.string.mixpanel_token)
         mixpanel = MixpanelAPI.getInstance(
             this,
-            if (mixpanelToken != "YOUR_MIXPANEL_TOKEN") mixpanelToken else "dummy_token",
+            mixpanelToken,
             true  // opt-out tracking enabled
         )
         

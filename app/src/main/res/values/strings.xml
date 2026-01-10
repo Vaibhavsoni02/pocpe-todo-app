@@ -19,9 +19,9 @@
     <string name="no_account">Don\'t have an account? Sign up</string>
     
     <!-- Replace these with your actual Facebook App ID and Client Token -->
-    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
-    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+    <string name="facebook_app_id">2355651984881781</string>
+    <string name="facebook_client_token">ecdeffc3f9ef3f32aa5f219e33c31c9c</string>
     
     <!-- Replace with your actual Mixpanel token -->
-    <string name="mixpanel_token">YOUR_MIXPANEL_TOKEN</string>
+    <string name="mixpanel_token">6b1341d9f110d465a4893affa0c6f216</string>
 </resources>
