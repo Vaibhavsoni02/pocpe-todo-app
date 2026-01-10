@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         
         setupEmailLogin()
         setupFacebookLogin()
+        setupSignUp()
     }
     
     private fun setupEmailLogin() {
@@ -97,6 +98,64 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(
                             this,
                             "Authentication failed: ${task.exception?.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+        }
+    }
+    
+    private fun setupSignUp() {
+        binding.tvSignUp.setOnClickListener {
+            val email = binding.etEmail.text.toString().trim()
+            val password = binding.etPassword.text.toString().trim()
+            
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            if (password.length < 6) {
+                Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            binding.progressBar.visibility = android.view.View.VISIBLE
+            
+            // Track sign up attempt in Mixpanel
+            val properties = JSONObject().apply {
+                put("method", "email")
+            }
+            mixpanel.track("Sign Up Attempt", properties)
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this) { task ->
+                    binding.progressBar.visibility = android.view.View.GONE
+                    
+                    if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        if (user != null) {
+                            // Track successful sign up
+                            val successProps = JSONObject().apply {
+                                put("method", "email")
+                            }
+                            mixpanel.track("Sign Up Success", successProps)
+                            mixpanel.identify(user.uid)
+                            mixpanel.getPeople().set("email", user.email)
+                            
+                            Toast.makeText(this, getString(R.string.account_created), Toast.LENGTH_SHORT).show()
+                            navigateToHome(user)
+                        }
+                    } else {
+                        // Track failed sign up
+                        val failedProps = JSONObject().apply {
+                            put("method", "email")
+                            put("error", task.exception?.message ?: "Unknown error")
+                        }
+                        mixpanel.track("Sign Up Failed", failedProps)
+                        Toast.makeText(
+                            this,
+                            getString(R.string.sign_up_failed, task.exception?.message ?: "Unknown error"),
                             Toast.LENGTH_SHORT
                         ).show()
                     }

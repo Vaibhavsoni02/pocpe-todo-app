@@ -17,6 +17,11 @@
     <string name="bluetooth_enabled">Bluetooth: Enabled</string>
     <string name="bluetooth_disabled">Bluetooth: Disabled</string>
     <string name="no_account">Don\'t have an account? Sign up</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_up_with_email">Sign Up with Email</string>
+    <string name="already_have_account">Already have an account? Login</string>
+    <string name="account_created">Account created successfully!</string>
+    <string name="sign_up_failed">Sign up failed: %1$s</string>
     
     <!-- Replace these with your actual Facebook App ID and Client Token -->
     <string name="facebook_app_id">2355651984881781</string>
