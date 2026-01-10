@@ -4,11 +4,14 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
 // Load app configuration
 val appConfigFile = file("app-config.properties")
-val appConfig = java.util.Properties()
+val appConfig = Properties()
 if (appConfigFile.exists()) {
-    appConfig.load(java.io.FileInputStream(appConfigFile))
+    appConfig.load(FileInputStream(appConfigFile))
 }
 
 val appName = appConfig.getProperty("APP_NAME", "My Client App")
