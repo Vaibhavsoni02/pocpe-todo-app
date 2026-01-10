@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import com.pocpe.todo.databinding.ActivityHomeBinding
+import org.json.JSONObject
 
 class HomeActivity : AppCompatActivity() {
     
@@ -37,7 +38,8 @@ class HomeActivity : AppCompatActivity() {
         val mixpanelToken = getString(R.string.mixpanel_token)
         mixpanel = MixpanelAPI.getInstance(
             this,
-            if (mixpanelToken != "YOUR_MIXPANEL_TOKEN") mixpanelToken else "dummy_token"
+            if (mixpanelToken != "YOUR_MIXPANEL_TOKEN") mixpanelToken else "dummy_token",
+            true  // opt-out tracking enabled
         )
         
         // Initialize Bluetooth
@@ -95,7 +97,10 @@ class HomeActivity : AppCompatActivity() {
         binding.tvInternetStatus.text = status
         Toast.makeText(this, status, Toast.LENGTH_SHORT).show()
         
-        mixpanel.track("Internet Status Checked", mapOf("connected" to isConnected))
+        val internetProps = JSONObject().apply {
+            put("connected", isConnected)
+        }
+        mixpanel.track("Internet Status Checked", internetProps)
     }
     
     private fun isInternetAvailable(): Boolean {
@@ -134,7 +139,10 @@ class HomeActivity : AppCompatActivity() {
         binding.tvBluetoothStatus.text = status
         Toast.makeText(this, status, Toast.LENGTH_SHORT).show()
         
-        mixpanel.track("Bluetooth Status Checked", mapOf("enabled" to isEnabled))
+        val bluetoothProps = JSONObject().apply {
+            put("enabled", isEnabled)
+        }
+        mixpanel.track("Bluetooth Status Checked", bluetoothProps)
     }
     
     private fun hasBluetoothPermissions(): Boolean {

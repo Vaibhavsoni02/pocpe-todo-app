@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import com.pocpe.todo.databinding.ActivityMainBinding
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
     
@@ -33,7 +34,8 @@ class MainActivity : AppCompatActivity() {
         val mixpanelToken = getString(R.string.mixpanel_token)
         mixpanel = MixpanelAPI.getInstance(
             this,
-            if (mixpanelToken != "YOUR_MIXPANEL_TOKEN") mixpanelToken else "dummy_token"
+            if (mixpanelToken != "YOUR_MIXPANEL_TOKEN") mixpanelToken else "dummy_token",
+            true  // opt-out tracking enabled
         )
         
         // Initialize Facebook Callback Manager
@@ -63,7 +65,10 @@ class MainActivity : AppCompatActivity() {
             binding.progressBar.visibility = android.view.View.VISIBLE
             
             // Track login attempt in Mixpanel
-            mixpanel.track("Login Attempt", mapOf("method" to "email"))
+            val properties = JSONObject().apply {
+                put("method", "email")
+            }
+            mixpanel.track("Login Attempt", properties)
             
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
@@ -73,7 +78,10 @@ class MainActivity : AppCompatActivity() {
                         val user = auth.currentUser
                         if (user != null) {
                             // Track successful login
-                            mixpanel.track("Login Success", mapOf("method" to "email"))
+                            val successProps = JSONObject().apply {
+                                put("method", "email")
+                            }
+                            mixpanel.track("Login Success", successProps)
                             mixpanel.identify(user.uid)
                             mixpanel.getPeople().set("email", user.email)
                             
@@ -81,10 +89,11 @@ class MainActivity : AppCompatActivity() {
                         }
                     } else {
                         // Track failed login
-                        mixpanel.track("Login Failed", mapOf(
-                            "method" to "email",
-                            "error" to (task.exception?.message ?: "Unknown error")
-                        ))
+                        val failedProps = JSONObject().apply {
+                            put("method", "email")
+                            put("error", task.exception?.message ?: "Unknown error")
+                        }
+                        mixpanel.track("Login Failed", failedProps)
                         Toast.makeText(
                             this,
                             "Authentication failed: ${task.exception?.message}",
@@ -104,15 +113,19 @@ class MainActivity : AppCompatActivity() {
             
             override fun onCancel() {
                 Toast.makeText(this@MainActivity, "Facebook login cancelled", Toast.LENGTH_SHORT).show()
-                mixpanel.track("Login Cancelled", mapOf("method" to "facebook"))
+                val cancelledProps = JSONObject().apply {
+                    put("method", "facebook")
+                }
+                mixpanel.track("Login Cancelled", cancelledProps)
             }
             
             override fun onError(error: FacebookException) {
                 Toast.makeText(this@MainActivity, "Facebook login error: ${error.message}", Toast.LENGTH_SHORT).show()
-                mixpanel.track("Login Error", mapOf(
-                    "method" to "facebook",
-                    "error" to (error.message ?: "Unknown error")
-                ))
+                val errorProps = JSONObject().apply {
+                    put("method", "facebook")
+                    put("error", error.message ?: "Unknown error")
+                }
+                mixpanel.track("Login Error", errorProps)
             }
         })
     }
@@ -128,17 +141,21 @@ class MainActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
-                        mixpanel.track("Login Success", mapOf("method" to "facebook"))
+                        val fbSuccessProps = JSONObject().apply {
+                            put("method", "facebook")
+                        }
+                        mixpanel.track("Login Success", fbSuccessProps)
                         mixpanel.identify(user.uid)
                         mixpanel.getPeople().set("email", user.email)
                         
                         navigateToHome(user)
                     }
                 } else {
-                    mixpanel.track("Login Failed", mapOf(
-                        "method" to "facebook",
-                        "error" to (task.exception?.message ?: "Unknown error")
-                    ))
+                    val fbFailedProps = JSONObject().apply {
+                        put("method", "facebook")
+                        put("error", task.exception?.message ?: "Unknown error")
+                    }
+                    mixpanel.track("Login Failed", fbFailedProps)
                     Toast.makeText(
                         this,
                         "Authentication failed: ${task.exception?.message}",
