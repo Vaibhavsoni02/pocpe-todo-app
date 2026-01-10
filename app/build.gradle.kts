@@ -48,21 +48,6 @@ android {
         }
     }
     
-    // Customize APK output name
-    applicationVariants.all {
-        outputs.all {
-            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            if (output != null) {
-                val fileName = when (buildType.name) {
-                    "debug" -> "${apkName}-${versionName}-debug.apk"
-                    "release" -> "${apkName}-${versionName}.apk"
-                    else -> "${apkName}-${versionName}-${buildType.name}.apk"
-                }
-                output.outputFileName = fileName
-            }
-        }
-    }
-    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
