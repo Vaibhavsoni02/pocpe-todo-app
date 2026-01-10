@@ -53,6 +53,11 @@
             android:exported="false"
             android:theme="@style/Theme.MyApp" />
 
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApp" />
+
     </application>
 
 </manifest>

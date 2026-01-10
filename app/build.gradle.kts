@@ -4,6 +4,18 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// Load app configuration
+val appConfigFile = file("app-config.properties")
+val appConfig = java.util.Properties()
+if (appConfigFile.exists()) {
+    appConfig.load(java.io.FileInputStream(appConfigFile))
+}
+
+val appName = appConfig.getProperty("APP_NAME", "My Client App")
+val appVersionName = appConfig.getProperty("APP_VERSION_NAME", "1.0.0")
+val appVersionCode = appConfig.getProperty("APP_VERSION_CODE", "1").toInt()
+val apkName = appConfig.getProperty("APK_NAME", "client-app")
+
 android {
     namespace = "com.pocpe.todo"
     compileSdk = 34
@@ -12,19 +24,39 @@ android {
         applicationId = "com.pocpe.todo"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
+        resValue("string", "app_name", appName)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            resValue("string", "app_name", "$appName (Debug)")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+    
+    // Customize APK output name
+    applicationVariants.all {
+        outputs.all {
+            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            output?.outputFileName?.let {
+                val fileName = when (buildType.name) {
+                    "debug" -> "${apkName}-${versionName}-debug.apk"
+                    "release" -> "${apkName}-${versionName}.apk"
+                    else -> "${apkName}-${versionName}-${buildType.name}.apk"
+                }
+                output.outputFileName.set(fileName)
+            }
         }
     }
     

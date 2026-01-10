@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App name is dynamically set from app-config.properties via build.gradle.kts -->
+    <!-- This is a fallback value, actual app name comes from app-config.properties -->
     <string name="app_name">My Client App</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
@@ -17,6 +19,9 @@
     <string name="bluetooth_enabled">Bluetooth: Enabled</string>
     <string name="bluetooth_disabled">Bluetooth: Disabled</string>
     <string name="no_account">Don\'t have an account? Sign up</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="passwords_not_match">Passwords do not match</string>
+    <string name="fill_all_fields">Please fill all fields</string>
     <string name="check_internet_speed">Check Internet Speed</string>
     <string name="toggle_flashlight">Toggle Flashlight</string>
     <string name="flashlight_on">Flashlight: ON</string>

@@ -12,7 +12,7 @@ import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.mixpanel.android.mpmetrics.MixpanelAPI
-import com.pocpe.todo.databinding.ActivityMainBinding
+import com.pocpe.todo.databinding.ActivitySignUpBinding
 import org.json.JSONObject
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import kotlinx.coroutines.CoroutineScope
@@ -20,16 +20,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainActivity : AppCompatActivity() {
+class SignUpActivity : AppCompatActivity() {
     
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivitySignUpBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var callbackManager: CallbackManager
     private lateinit var mixpanel: MixpanelAPI
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivitySignUpBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
         // Initialize Firebase Auth
@@ -46,48 +46,52 @@ class MainActivity : AppCompatActivity() {
         // Initialize Facebook Callback Manager
         callbackManager = CallbackManager.Factory.create()
         
-        // Check if user is already logged in
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            navigateToHome(currentUser)
-            return
-        }
-        
-        setupEmailLogin()
-        setupFacebookLogin()
-        setupSignUpNavigation()
+        setupSignUp()
+        setupFacebookSignUp()
+        setupLoginNavigation()
     }
     
-    private fun setupEmailLogin() {
-        binding.btnLoginEmail.setOnClickListener {
+    private fun setupSignUp() {
+        binding.btnSignUp.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
+            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
             
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
+            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            if (password.length < 6) {
+                Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            if (password != confirmPassword) {
+                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             
             binding.progressBar.visibility = android.view.View.VISIBLE
             
-            // Track login attempt in Mixpanel
+            // Track sign up attempt in Mixpanel
             val properties = JSONObject().apply {
                 put("method", "email")
             }
-            mixpanel.track("Login Attempt", properties)
+            mixpanel.track("Sign Up Attempt", properties)
             
-            auth.signInWithEmailAndPassword(email, password)
+            auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     binding.progressBar.visibility = android.view.View.GONE
                     
                     if (task.isSuccessful) {
                         val user = auth.currentUser
                         if (user != null) {
-                            // Track successful login
+                            // Track successful sign up
                             val successProps = JSONObject().apply {
                                 put("method", "email")
                             }
-                            mixpanel.track("Login Success", successProps)
+                            mixpanel.track("Sign Up Success", successProps)
                             
                             // Identify user with email
                             user.email?.let { email ->
@@ -95,18 +99,19 @@ class MainActivity : AppCompatActivity() {
                                 updateMixpanelUserProfile(user, email)
                             }
                             
+                            Toast.makeText(this, getString(R.string.account_created), Toast.LENGTH_SHORT).show()
                             navigateToHome(user)
                         }
                     } else {
-                        // Track failed login
+                        // Track failed sign up
                         val failedProps = JSONObject().apply {
                             put("method", "email")
                             put("error", task.exception?.message ?: "Unknown error")
                         }
-                        mixpanel.track("Login Failed", failedProps)
+                        mixpanel.track("Sign Up Failed", failedProps)
                         Toast.makeText(
                             this,
-                            "Authentication failed: ${task.exception?.message}",
+                            getString(R.string.sign_up_failed, task.exception?.message ?: "Unknown error"),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -114,35 +119,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    private fun setupSignUpNavigation() {
-        binding.tvSignUp.setOnClickListener {
-            val intent = Intent(this, SignUpActivity::class.java)
-            startActivity(intent)
-        }
-    }
-    
-    private fun setupFacebookLogin() {
-        binding.btnLoginFacebook.setPermissions("email", "public_profile")
-        binding.btnLoginFacebook.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+    private fun setupFacebookSignUp() {
+        binding.btnSignUpFacebook.setPermissions("email", "public_profile")
+        binding.btnSignUpFacebook.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
             override fun onSuccess(loginResult: LoginResult) {
                 handleFacebookAccessToken(loginResult.accessToken.token)
             }
             
             override fun onCancel() {
-                Toast.makeText(this@MainActivity, "Facebook login cancelled", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SignUpActivity, "Facebook sign up cancelled", Toast.LENGTH_SHORT).show()
                 val cancelledProps = JSONObject().apply {
                     put("method", "facebook")
                 }
-                mixpanel.track("Login Cancelled", cancelledProps)
+                mixpanel.track("Sign Up Cancelled", cancelledProps)
             }
             
             override fun onError(error: FacebookException) {
-                Toast.makeText(this@MainActivity, "Facebook login error: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SignUpActivity, "Facebook sign up error: ${error.message}", Toast.LENGTH_SHORT).show()
                 val errorProps = JSONObject().apply {
                     put("method", "facebook")
                     put("error", error.message ?: "Unknown error")
                 }
-                mixpanel.track("Login Error", errorProps)
+                mixpanel.track("Sign Up Error", errorProps)
             }
         })
     }
@@ -161,7 +159,7 @@ class MainActivity : AppCompatActivity() {
                         val fbSuccessProps = JSONObject().apply {
                             put("method", "facebook")
                         }
-                        mixpanel.track("Login Success", fbSuccessProps)
+                        mixpanel.track("Sign Up Success", fbSuccessProps)
                         
                         // Identify user with email
                         user.email?.let { email ->
@@ -176,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                         put("method", "facebook")
                         put("error", task.exception?.message ?: "Unknown error")
                     }
-                    mixpanel.track("Login Failed", fbFailedProps)
+                    mixpanel.track("Sign Up Failed", fbFailedProps)
                     Toast.makeText(
                         this,
                         "Authentication failed: ${task.exception?.message}",
@@ -186,6 +184,14 @@ class MainActivity : AppCompatActivity() {
             }
     }
     
+    private fun setupLoginNavigation() {
+        binding.tvLogin.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+    }
+    
     private fun navigateToHome(user: FirebaseUser) {
         val intent = Intent(this, HomeActivity::class.java)
         intent.putExtra("user_email", user.email)
@@ -193,14 +199,6 @@ class MainActivity : AppCompatActivity() {
         finish()
     }
     
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        callbackManager.onActivityResult(requestCode, resultCode, data)
-    }
-    
-    /**
-     * Update Mixpanel user profile with user information and Android Advertising ID
-     */
     private fun updateMixpanelUserProfile(user: FirebaseUser, email: String) {
         // Set user properties
         mixpanel.getPeople().set("email", email)
@@ -219,16 +217,19 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     advertisingId?.let { gaid ->
                         mixpanel.getPeople().set("android_ad_id", gaid)
-                        mixpanel.getPeople().set("gps_adid", gaid) // Alternative name
+                        mixpanel.getPeople().set("gps_adid", gaid)
                         mixpanel.getPeople().set("limit_ad_tracking", isLimitAdTrackingEnabled)
                     }
                 }
             } catch (e: Exception) {
-                // Advertising ID might not be available (e.g., on emulator or restricted)
-                // Log but don't fail the login process
-                android.util.Log.w("MainActivity", "Failed to get Advertising ID: ${e.message}")
+                android.util.Log.w("SignUpActivity", "Failed to get Advertising ID: ${e.message}")
             }
         }
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        callbackManager.onActivityResult(requestCode, resultCode, data)
     }
     
     override fun onDestroy() {

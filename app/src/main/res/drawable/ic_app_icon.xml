@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#6200EE"
+        android:pathData="M54,0C24.17,0 0,24.17 0,54s24.17,54 54,54s54,-24.17 54,-54S83.83,0 54,0z" />
+    
+    <!-- App Icon Shape - You can replace this with your custom design -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,20c-18.78,0 -34,15.22 -34,34s15.22,34 34,34s34,-15.22 34,-34S72.78,20 54,20z" />
+    
+    <!-- Inner design -->
+    <path
+        android:fillColor="#6200EE"
+        android:pathData="M54,32c-12.15,0 -22,9.85 -22,22s9.85,22 22,22s22,-9.85 22,-22S66.15,32 54,32z" />
+        
+</vector>
