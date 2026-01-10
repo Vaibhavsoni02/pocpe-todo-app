@@ -51,13 +51,14 @@ android {
     // Customize APK output name
     applicationVariants.all {
         outputs.all {
-            if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            output?.let {
                 val fileName = when (buildType.name) {
                     "debug" -> "${apkName}-${versionName}-debug.apk"
                     "release" -> "${apkName}-${versionName}.apk"
                     else -> "${apkName}-${versionName}-${buildType.name}.apk"
                 }
-                this.outputFileName.set(fileName)
+                it.outputFileName.set(fileName)
             }
         }
     }
