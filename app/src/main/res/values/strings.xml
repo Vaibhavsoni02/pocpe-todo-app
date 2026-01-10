@@ -17,11 +17,29 @@
     <string name="bluetooth_enabled">Bluetooth: Enabled</string>
     <string name="bluetooth_disabled">Bluetooth: Disabled</string>
     <string name="no_account">Don\'t have an account? Sign up</string>
+    <string name="check_internet_speed">Check Internet Speed</string>
+    <string name="toggle_flashlight">Toggle Flashlight</string>
+    <string name="flashlight_on">Flashlight: ON</string>
+    <string name="flashlight_off">Flashlight: OFF</string>
+    <string name="user_profile">User Profile</string>
+    <string name="profile">Profile</string>
+    <string name="speed_testing">Testing Speed...</string>
+    <string name="download_speed">Download Speed: %1$s</string>
+    <string name="upload_speed">Upload Speed: %1$s</string>
+    <string name="speed_error">Speed test failed</string>
+    <string name="camera_permission_required">Camera permission required for flashlight</string>
     <string name="sign_up">Sign Up</string>
     <string name="sign_up_with_email">Sign Up with Email</string>
     <string name="already_have_account">Already have an account? Login</string>
     <string name="account_created">Account created successfully!</string>
     <string name="sign_up_failed">Sign up failed: %1$s</string>
+    <string name="back_to_home">Back to Home</string>
+    <string name="account_information">Account Information</string>
+    <string name="user_id_label">User ID: %1$s</string>
+    <string name="name_label">Name: %1$s</string>
+    <string name="account_created_label">Account Created: %1$s</string>
+    <string name="last_login_label">Last Login: %1$s</string>
+    <string name="no_email">No email</string>
     
     <!-- Replace these with your actual Facebook App ID and Client Token -->
     <string name="facebook_app_id">2355651984881781</string>
