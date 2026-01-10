@@ -36,7 +36,7 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
+            // Note: Removed applicationIdSuffix to match google-services.json package name
             resValue("string", "app_name", "$appName (Debug)")
         }
         release {
