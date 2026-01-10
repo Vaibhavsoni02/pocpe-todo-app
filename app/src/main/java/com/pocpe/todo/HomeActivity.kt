@@ -251,10 +251,10 @@ class HomeActivity : AppCompatActivity() {
                 connection.readTimeout = 10000
                 
                 val startTime = System.currentTimeMillis()
+                var totalBytes = 0L
                 connection.inputStream.use { input ->
                     val buffer = ByteArray(8192)
                     var bytesRead: Int
-                    var totalBytes = 0L
                     
                     while (input.read(buffer).also { bytesRead = it } != -1) {
                         totalBytes += bytesRead
@@ -273,7 +273,7 @@ class HomeActivity : AppCompatActivity() {
                     binding.btnCheckInternetSpeed.isEnabled = true
                     
                     val speedProps = JSONObject().apply {
-                        put("speed_mbps", speedMbps)
+                        put("speed_mbps", speedMbps.toDouble())
                         put("duration_seconds", duration)
                     }
                     mixpanel.track("Internet Speed Tested", speedProps)
