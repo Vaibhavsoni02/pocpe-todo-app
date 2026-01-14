@@ -49,9 +49,7 @@ object RudderStackHelper {
         for (className in classNames) {
             try {
                 val cls = Class.forName(className)
-                val factory = runCatching { cls.getField("FACTORY").get(null) }
-                    .getOrElse { return@runCatching null }
-
+                val factory = cls.getField("FACTORY").get(null)
                 if (factory != null) {
                     withFactory.invoke(configBuilder, factory)
                     return

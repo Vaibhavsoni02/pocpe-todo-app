@@ -46,7 +46,63 @@ object AnalyticsHelper {
             }
         }
 
-        client.identify(userId, rudderTraits)
+        // RudderStack Android SDK (legacy) has multiple identify overloads across versions.
+        // Use reflection so we stay compatible with the published version in CI.
+        invokeIdentifyCompat(client, userId, rudderTraits)
+    }
+
+    private fun invokeIdentifyCompat(client: RudderClient, userId: String, traits: RudderTraits) {
+        val methods = client.javaClass.methods.filter { it.name == "identify" }
+
+        // 1) identify(String, RudderTraits, RudderOption?)
+        methods.firstOrNull {
+            it.parameterTypes.size == 3 &&
+                it.parameterTypes[0] == String::class.java &&
+                it.parameterTypes[1].name.endsWith("RudderTraits")
+        }?.let {
+            try {
+                it.invoke(client, userId, traits, null)
+                return
+            } catch (_: Throwable) { /* ignore */ }
+        }
+
+        // 2) identify(String, RudderTraits)
+        methods.firstOrNull {
+            it.parameterTypes.size == 2 &&
+                it.parameterTypes[0] == String::class.java &&
+                it.parameterTypes[1].name.endsWith("RudderTraits")
+        }?.let {
+            try {
+                it.invoke(client, userId, traits)
+                return
+            } catch (_: Throwable) { /* ignore */ }
+        }
+
+        // 3) identify(String) then identify(RudderTraits)
+        methods.firstOrNull {
+            it.parameterTypes.size == 1 && it.parameterTypes[0] == String::class.java
+        }?.let {
+            try { it.invoke(client, userId) } catch (_: Throwable) { /* ignore */ }
+        }
+
+        methods.firstOrNull {
+            it.parameterTypes.size == 1 && it.parameterTypes[0].name.endsWith("RudderTraits")
+        }?.let {
+            try {
+                it.invoke(client, traits)
+                return
+            } catch (_: Throwable) { /* ignore */ }
+        }
+
+        // 4) identify(RudderTraits, RudderOption?)
+        methods.firstOrNull {
+            it.parameterTypes.size == 2 && it.parameterTypes[0].name.endsWith("RudderTraits")
+        }?.let {
+            try {
+                it.invoke(client, traits, null)
+                return
+            } catch (_: Throwable) { /* ignore */ }
+        }
     }
     
     fun screen(screenName: String, properties: Map<String, Any>? = null) {
