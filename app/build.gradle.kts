@@ -93,8 +93,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     
     // RudderStack SDK
-    implementation("com.rudderstack.android.sdk:core:3.0.0")
-    implementation("com.rudderstack.android.sdk:facebook-app-events:3.0.0")
+    implementation("com.rudderstack.android.sdk:core:1.27.2")
+    // Facebook App Events (Device Mode)
+    implementation("com.rudderstack.android.integration:facebook:1.2.0")
     
     // Google Ads
     implementation("com.google.android.gms:play-services-ads:22.6.0")
