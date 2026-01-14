@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.pocpe.todo.utils.AnalyticsHelper
 
 class MainActivity : AppCompatActivity() {
     
@@ -42,6 +43,9 @@ class MainActivity : AppCompatActivity() {
             mixpanelToken,
             true  // opt-out tracking enabled
         )
+        
+        // Track screen view in RudderStack
+        AnalyticsHelper.screen("Login Screen")
         
         // Initialize Facebook Callback Manager
         callbackManager = CallbackManager.Factory.create()
@@ -74,7 +78,12 @@ class MainActivity : AppCompatActivity() {
             val properties = JSONObject().apply {
                 put("method", "email")
             }
-            mixpanel.track("Login Attempt", properties)
+                mixpanel.track("Login Attempt", properties)
+            
+            // Track login attempt in RudderStack
+            AnalyticsHelper.trackEvent("Login Attempt", mapOf(
+                "method" to "email"
+            ))
             
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
@@ -93,7 +102,18 @@ class MainActivity : AppCompatActivity() {
                             user.email?.let { email ->
                                 mixpanel.identify(email)
                                 updateMixpanelUserProfile(user, email)
+                                // Identify in RudderStack
+                                AnalyticsHelper.identify(email, mapOf(
+                                    "user_id" to user.uid,
+                                    "email" to email,
+                                    "display_name" to (user.displayName ?: "")
+                                ))
                             }
+                            
+                            // Track login success in RudderStack
+                            AnalyticsHelper.trackEvent("Login Success", mapOf(
+                                "method" to "email"
+                            ))
                             
                             navigateToHome(user)
                         }
@@ -104,6 +124,12 @@ class MainActivity : AppCompatActivity() {
                             put("error", task.exception?.message ?: "Unknown error")
                         }
                         mixpanel.track("Login Failed", failedProps)
+                        
+                        // Track in RudderStack
+                        AnalyticsHelper.trackEvent("Login Failed", mapOf(
+                            "method" to "email",
+                            "error" to (task.exception?.message ?: "Unknown error")
+                        ))
                         Toast.makeText(
                             this,
                             "Authentication failed: ${task.exception?.message}",
@@ -134,6 +160,11 @@ class MainActivity : AppCompatActivity() {
                     put("method", "facebook")
                 }
                 mixpanel.track("Login Cancelled", cancelledProps)
+                
+                // Track in RudderStack
+                AnalyticsHelper.trackEvent("Login Cancelled", mapOf(
+                    "method" to "facebook"
+                ))
             }
             
             override fun onError(error: FacebookException) {
@@ -143,6 +174,12 @@ class MainActivity : AppCompatActivity() {
                     put("error", error.message ?: "Unknown error")
                 }
                 mixpanel.track("Login Error", errorProps)
+                
+                // Track in RudderStack
+                AnalyticsHelper.trackEvent("Login Error", mapOf(
+                    "method" to "facebook",
+                    "error" to (error.message ?: "Unknown error")
+                ))
             }
         })
     }
@@ -167,7 +204,18 @@ class MainActivity : AppCompatActivity() {
                         user.email?.let { email ->
                             mixpanel.identify(email)
                             updateMixpanelUserProfile(user, email)
+                            // Identify in RudderStack
+                            AnalyticsHelper.identify(email, mapOf(
+                                "user_id" to user.uid,
+                                "email" to email,
+                                "display_name" to (user.displayName ?: "")
+                            ))
                         }
+                        
+                        // Track Facebook login success in RudderStack
+                        AnalyticsHelper.trackEvent("Login Success", mapOf(
+                            "method" to "facebook"
+                        ))
                         
                         navigateToHome(user)
                     }
@@ -177,6 +225,12 @@ class MainActivity : AppCompatActivity() {
                         put("error", task.exception?.message ?: "Unknown error")
                     }
                     mixpanel.track("Login Failed", fbFailedProps)
+                    
+                    // Track in RudderStack
+                    AnalyticsHelper.trackEvent("Login Failed", mapOf(
+                        "method" to "facebook",
+                        "error" to (task.exception?.message ?: "Unknown error")
+                    ))
                     Toast.makeText(
                         this,
                         "Authentication failed: ${task.exception?.message}",

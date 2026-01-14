@@ -52,4 +52,24 @@
     
     <!-- Replace with your actual Mixpanel token -->
     <string name="mixpanel_token">6b1341d9f110d465a4893affa0c6f216</string>
+    
+    <!-- Ecommerce strings -->
+    <string name="shop">Shop</string>
+    <string name="collection">Collection</string>
+    <string name="products">Products</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="cart">Cart</string>
+    <string name="checkout">Checkout</string>
+    <string name="purchase">Purchase</string>
+    <string name="product_details">Product Details</string>
+    <string name="price">Price</string>
+    <string name="quantity">Quantity</string>
+    <string name="total">Total</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="order_complete">Order Complete</string>
+    <string name="continue_shopping">Continue Shopping</string>
+    <string name="empty_cart">Your cart is empty</string>
+    <string name="remove">Remove</string>
+    <string name="proceed_to_checkout">Proceed to Checkout</string>
+    <string name="place_order">Place Order</string>
 </resources>

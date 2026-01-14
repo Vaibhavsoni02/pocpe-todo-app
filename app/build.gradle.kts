@@ -92,6 +92,17 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     
+    // RudderStack SDK
+    implementation("com.rudderstack.android.sdk:core:3.0.0")
+    implementation("com.rudderstack.android.sdk:facebook-app-events:3.0.0")
+    
+    // Google Ads
+    implementation("com.google.android.gms:play-services-ads:22.6.0")
+    
+    // RecyclerView for product listings
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.cardview:cardview:1.0.0")
+    
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

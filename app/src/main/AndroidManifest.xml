@@ -14,6 +14,7 @@
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
 
     <application
+        android:name=".TodoApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -55,6 +56,26 @@
 
         <activity
             android:name=".SignUpActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApp" />
+
+        <activity
+            android:name=".CollectionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApp" />
+
+        <activity
+            android:name=".ProductDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApp" />
+
+        <activity
+            android:name=".CartActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApp" />
+
+        <activity
+            android:name=".CheckoutActivity"
             android:exported="false"
             android:theme="@style/Theme.MyApp" />
 

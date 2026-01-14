@@ -28,6 +28,7 @@ import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.DecimalFormat
+import com.pocpe.todo.utils.AnalyticsHelper
 
 class HomeActivity : AppCompatActivity() {
     
@@ -86,6 +87,11 @@ class HomeActivity : AppCompatActivity() {
         // Track screen view
         mixpanel.track("Home Screen Viewed")
         
+        // Track screen view in RudderStack
+        AnalyticsHelper.screen("Home Screen", mapOf(
+            "user_email" to userEmail
+        ))
+        
         setupButtons()
         checkPermissions()
     }
@@ -95,24 +101,38 @@ class HomeActivity : AppCompatActivity() {
         binding.btnCheckInternet.setOnClickListener {
             checkInternetConnection()
             mixpanel.track("Internet Check Button Clicked")
+            AnalyticsHelper.trackEvent("Internet Check Button Clicked")
         }
         
         // Check Bluetooth Button
         binding.btnCheckBluetooth.setOnClickListener {
             checkBluetoothStatus()
             mixpanel.track("Bluetooth Check Button Clicked")
+            AnalyticsHelper.trackEvent("Bluetooth Check Button Clicked")
         }
         
         // Internet Speed Button
         binding.btnCheckInternetSpeed.setOnClickListener {
             checkInternetSpeed()
             mixpanel.track("Internet Speed Check Button Clicked")
+            AnalyticsHelper.trackEvent("Internet Speed Check Button Clicked")
         }
         
         // Toggle Flashlight Button
         binding.btnToggleFlashlight.setOnClickListener {
             toggleFlashlight()
             mixpanel.track("Flashlight Toggle Button Clicked")
+            AnalyticsHelper.trackEvent("Flashlight Toggle Button Clicked", mapOf(
+                "flashlight_on" to !isFlashlightOn
+            ))
+        }
+        
+        // Shop Button
+        binding.btnShop.setOnClickListener {
+            val intent = Intent(this, CollectionActivity::class.java)
+            startActivity(intent)
+            mixpanel.track("Shop Button Clicked")
+            AnalyticsHelper.trackEvent("Shop Button Clicked")
         }
         
         // User Profile Button
@@ -120,12 +140,14 @@ class HomeActivity : AppCompatActivity() {
             val intent = Intent(this, UserProfileActivity::class.java)
             startActivity(intent)
             mixpanel.track("User Profile Button Clicked")
+            AnalyticsHelper.trackEvent("User Profile Button Clicked")
         }
         
         // Logout Button
         binding.btnLogout.setOnClickListener {
             logout()
             mixpanel.track("Logout Button Clicked")
+            AnalyticsHelper.trackEvent("Logout Button Clicked")
         }
     }
     
@@ -144,6 +166,11 @@ class HomeActivity : AppCompatActivity() {
             put("connected", isConnected)
         }
         mixpanel.track("Internet Status Checked", internetProps)
+        
+        // Track in RudderStack
+        AnalyticsHelper.trackEvent("Internet Status Checked", mapOf(
+            "connected" to isConnected
+        ))
     }
     
     private fun isInternetAvailable(): Boolean {
@@ -186,6 +213,11 @@ class HomeActivity : AppCompatActivity() {
             put("enabled", isEnabled)
         }
         mixpanel.track("Bluetooth Status Checked", bluetoothProps)
+        
+        // Track in RudderStack
+        AnalyticsHelper.trackEvent("Bluetooth Status Checked", mapOf(
+            "enabled" to isEnabled
+        ))
     }
     
     private fun hasBluetoothPermissions(): Boolean {
@@ -277,6 +309,12 @@ class HomeActivity : AppCompatActivity() {
                         put("duration_seconds", duration)
                     }
                     mixpanel.track("Internet Speed Tested", speedProps)
+                    
+                    // Track in RudderStack
+                    AnalyticsHelper.trackEvent("Internet Speed Tested", mapOf(
+                        "speed_mbps" to speedMbps.toDouble(),
+                        "duration_seconds" to duration
+                    ))
                 }
                 
                 connection.disconnect()
@@ -316,6 +354,11 @@ class HomeActivity : AppCompatActivity() {
                 put("flashlight_on", isFlashlightOn)
             }
             mixpanel.track("Flashlight Toggled", flashlightProps)
+            
+            // Track in RudderStack
+            AnalyticsHelper.trackEvent("Flashlight Toggled", mapOf(
+                "flashlight_on" to isFlashlightOn
+            ))
         } catch (e: Exception) {
             Toast.makeText(this, "Failed to toggle flashlight: ${e.message}", Toast.LENGTH_SHORT).show()
         }
